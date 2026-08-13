@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie - MovieZone LK</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo">🎬 MovieZone <span>LK</span></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="index.html#movies">Movies</a>
+    <a href="admin.html">Add Movie</a>
+  </nav>
+</header>
+
+<main id="moviePage"></main>
+
+<footer>
+  <h2>🎬 MovieZone LK</h2>
+  <p>© 2026 MovieZone LK</p>
+</footer>
+
+<script src="movies.js"></script>
+<script>
+function getAllMovies() {
+  const saved = JSON.parse(localStorage.getItem("myMovies") || "[]");
+  return [...movies, ...saved];
+}
+
+const id = new URLSearchParams(location.search).get("id");
+const movie = getAllMovies().find(item => String(item.id) === String(id));
+const page = document.getElementById("moviePage");
+
+if (!movie) {
+  page.innerHTML = `<div class="not-found"><h1>Movie Not Found 😢</h1><a href="index.html">← Back to Home</a></div>`;
+} else {
+  document.title = movie.title + " - MovieZone LK";
+  const trailer = movie.trailer ? `
+    <section class="trailer">
+      <h2>🎞️ Trailer</h2>
+      <div class="video"><iframe src="${movie.trailer}" allowfullscreen></iframe></div>
+    </section>` : "";
+
+  page.innerHTML = `
+    <section class="movie-details">
+      <div class="details-poster"><img src="${movie.poster}" alt="${movie.title}"></div>
+      <div class="details-info">
+        <p class="red">MOVIE DETAILS</p>
+        <h1>${movie.title}</h1>
+        <div class="meta">⭐ ${movie.rating} &nbsp; • &nbsp; ${movie.year} &nbsp; • &nbsp; ${(movie.genre || []).join(", ")}</div>
+        <p class="description">${movie.description || ""}</p>
+        <p class="language">Language: ${movie.language || "English"}</p>
+      </div>
+    </section>
+    ${trailer}
+  `;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Movie - MovieZone LK</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo">🎬 MovieZone <span>LK</span></div>
+  <nav><a href="index.html">Home</a><a href="admin.html">Add Movie</a></nav>
+</header>
+
+<section class="admin">
+  <h1>➕ Add New Movie</h1>
+  <p class="admin-note">This simple version saves movies in this browser only.</p>
+
+  <form id="movieForm">
+    <input id="title" type="text" placeholder="Movie Title" required>
+    <input id="year" type="number" placeholder="Year" required>
+    <input id="rating" type="number" min="0" max="10" step="0.1" placeholder="Rating" required>
+    <input id="poster" type="url" placeholder="Poster Image URL" required>
+    <input id="trailer" type="url" placeholder="YouTube Embed URL (optional)">
+    <select id="genre">
+      <option>Action</option><option>Comedy</option><option>Adventure</option>
+      <option>Animation</option><option>Drama</option><option>Sinhala Dubbed</option>
+    </select>
+    <select id="language">
+      <option>English</option><option>Sinhala Dubbed</option><option>Other</option>
+    </select>
+    <textarea id="description" placeholder="Movie Description" required></textarea>
+    <button type="submit">➕ Add Movie</button>
+  </form>
+
+  <p id="message"></p>
+
+  <div class="saved-box">
+    <h2>Saved Movies</h2>
+    <div id="savedList"></div>
+  </div>
+</section>
+
+<script>
+const form = document.getElementById("movieForm");
+const message = document.getElementById("message");
+const savedList = document.getElementById("savedList");
+
+function getSaved() {
+  return JSON.parse(localStorage.getItem("myMovies") || "[]");
+}
+
+function renderSaved() {
+  const saved = getSaved();
+  savedList.innerHTML = saved.length ? saved.map(m => `
+    <div class="saved-item">
+      <span>${m.title}</span>
+      <button onclick="deleteMovie('${m.id}')">Delete</button>
+    </div>
+  `).join("") : "<p>No movies added yet.</p>";
+}
+
+function deleteMovie(id) {
+  const saved = getSaved().filter(m => String(m.id) !== String(id));
+  localStorage.setItem("myMovies", JSON.stringify(saved));
+  renderSaved();
+}
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const movie = {
+    id: "local-" + Date.now(),
+    title: title.value.trim(),
+    year: year.value,
+    rating: rating.value,
+    poster: poster.value.trim(),
+    trailer: trailer.value.trim(),
+    genre: [genre.value],
+    language: language.value,
+    description: description.value.trim()
+  };
+  const saved = getSaved();
+  saved.push(movie);
+  localStorage.setItem("myMovies", JSON.stringify(saved));
+  form.reset();
+  message.textContent = "✅ Movie added successfully!";
+  renderSaved();
+});
+
+renderSaved();
+</script>
+</body>
+</html>

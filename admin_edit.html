@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin - MovieZone LK</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><b>🎬 MovieZone <span>LK</span></b><nav><a href="index.html">Home</a><a href="admin.html">Add Movie</a></nav></header>
+<section class="admin">
+<h1 id="formTitle">➕ Add New Movie</h1><p id="msg"></p>
+<form id="form">
+<input id="title" placeholder="Movie Title" required>
+<input id="year" type="number" placeholder="Year">
+<input id="rating" type="number" min="0" max="10" step="0.1" placeholder="Rating">
+<input id="poster" type="url" placeholder="Poster Image URL" required>
+<input id="trailer" type="url" placeholder="YouTube Embed URL (optional)">
+<select id="genre"><option>Action</option><option>Comedy</option><option>Adventure</option><option>Animation</option><option>Drama</option><option>Sinhala Dubbed</option></select>
+<select id="language"><option>English</option><option>Sinhala Dubbed</option><option>Other</option></select>
+<textarea id="description" placeholder="Movie Description" required></textarea>
+<button id="submitBtn" type="submit">➕ Add Movie</button>
+<button id="cancelBtn" type="button" onclick="cancelEdit()" style="display:none;background:#555">Cancel Edit</button>
+</form>
+<h2>🎬 Online Movies</h2><div id="list"></div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="movies.js"></script>
+<script>
+let editingId=null;
+const form=document.getElementById("form"),msg=document.getElementById("msg"),list=document.getElementById("list");
+async function loadMovies(){
+ const {data,error}=await supabaseClient.from("movies").select("*").order("created_at",{ascending:false});
+ if(error){list.innerHTML="❌ "+error.message;return}
+ list.innerHTML=(data||[]).map(m=>`<div class="item"><span>${esc(m.title)}</span><div><button onclick="editMovie(${m.id})">✏️ Edit</button> <button onclick="deleteMovie(${m.id})">🗑️ Delete</button></div></div>`).join("")||"<p>No movies yet.</p>";
+}
+async function editMovie(id){
+ const {data,error}=await supabaseClient.from("movies").select("*").eq("id",id).single();
+ if(error||!data){msg.textContent="❌ Movie could not be loaded.";return}
+ editingId=id;
+ title.value=data.title||"";year.value=data.year||"";rating.value=data.rating||"";poster.value=data.poster||"";trailer.value=data.trailer||"";genre.value=data.genre||"Action";language.value=data.language||"English";description.value=data.description||"";
+ formTitle.textContent="✏️ Edit Movie";submitBtn.textContent="💾 Save Changes";cancelBtn.style.display="block";scrollTo({top:0,behavior:"smooth"});
+}
+async function deleteMovie(id){
+ if(!confirm("Delete this movie?"))return;
+ const {error}=await supabaseClient.from("movies").delete().eq("id",id);
+ msg.textContent=error?"❌ "+error.message:"✅ Movie deleted.";loadMovies();
+}
+form.onsubmit=async e=>{
+ e.preventDefault();msg.textContent="Saving...";
+ const movie={title:title.value.trim(),year:year.value?+year.value:null,rating:rating.value?+rating.value:null,poster:poster.value.trim(),trailer:trailer.value.trim(),genre:genre.value,language:language.value,description:description.value.trim()};
+ const result=editingId!==null?await supabaseClient.from("movies").update(movie).eq("id",editingId):await supabaseClient.from("movies").insert(movie);
+ if(result.error){msg.textContent="❌ "+result.error.message;return}
+ msg.textContent=editingId!==null?"✅ Movie updated successfully!":"✅ Movie added successfully!";cancelEdit();loadMovies();
+};
+function cancelEdit(){editingId=null;form.reset();formTitle.textContent="➕ Add New Movie";submitBtn.textContent="➕ Add Movie";cancelBtn.style.display="none"}
+function esc(t){return String(t||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+loadMovies();
+</script>
+</body></html>

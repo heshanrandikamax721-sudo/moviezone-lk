@@ -1,104 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MovieZone LK</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<header>
-  <div class="logo">🎬 MovieZone <span>LK</span></div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="#movies">Movies</a>
-    <a href="#categories">Categories</a>
-    <a href="admin.html">Add Movie</a>
-  </nav>
-</header>
-
-<section class="hero">
-  <div>
-    <p>WELCOME TO MOVIEZONE LK</p>
-    <h1>Discover Your<br>Next Movie</h1>
-    <span>Movies • Sinhala Dubbed • Hollywood</span>
-    <button onclick="document.getElementById('movies').scrollIntoView({behavior:'smooth'})">Explore Movies</button>
-  </div>
-</section>
-
-<section class="search">
-  <input id="search" type="text" placeholder="🔎 Search movie...">
-</section>
-
-<section id="categories">
-  <h2>Categories</h2>
-  <div class="category-buttons">
-    <button onclick="filterMovies('All')">All</button>
-    <button onclick="filterMovies('Action')">Action</button>
-    <button onclick="filterMovies('Comedy')">Comedy</button>
-    <button onclick="filterMovies('Adventure')">Adventure</button>
-    <button onclick="filterMovies('Animation')">Animation</button>
-    <button onclick="filterMovies('Sinhala Dubbed')">Sinhala Dubbed</button>
-  </div>
-</section>
-
-<section id="movies">
-  <div class="title-row">
-    <h2>🔥 Latest Movies</h2>
-    <span id="movieCount"></span>
-  </div>
-  <div id="movieGrid" class="movie-grid"></div>
-</section>
-
-<footer>
-  <h2>🎬 MovieZone LK</h2>
-  <p>© 2026 MovieZone LK</p>
-</footer>
-
-<script src="movies.js"></script>
-<script>
-let currentCategory = "All";
-const grid = document.getElementById("movieGrid");
-const search = document.getElementById("search");
-const count = document.getElementById("movieCount");
-
-function allMovies() {
-  const saved = JSON.parse(localStorage.getItem("myMovies") || "[]");
-  return [...movies, ...saved];
-}
-
-function displayMovies() {
-  const text = search.value.toLowerCase().trim();
-  const filtered = allMovies().filter(movie => {
-    const genres = movie.genre || [];
-    return movie.title.toLowerCase().includes(text) &&
-      (currentCategory === "All" || genres.includes(currentCategory));
-  });
-
-  grid.innerHTML = filtered.map(movie => `
-    <a class="movie-link" href="movie.html?id=${encodeURIComponent(movie.id)}">
-      <div class="movie-card">
-        <img src="${movie.poster}" alt="${movie.title}" loading="lazy">
-        <div class="movie-info">
-          <h3>${movie.title}</h3>
-          <p>${movie.year} • ${(movie.genre || ["Movie"])[0]}</p>
-          <span>⭐ ${movie.rating}</span>
-        </div>
-      </div>
-    </a>
-  `).join("");
-
-  count.textContent = filtered.length + " Movies";
-}
-
-function filterMovies(category) {
-  currentCategory = category;
-  displayMovies();
-  document.getElementById("movies").scrollIntoView({behavior:"smooth"});
-}
-
-search.addEventListener("input", displayMovies);
-displayMovies();
-</script>
-</body>
-</html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MovieZone LK</title><link rel="stylesheet" href="style.css"></head><body>
+<header><b>🎬 MovieZone <span>LK</span></b><nav><a href="index.html">Home</a><a href="#movies">Movies</a><a href="admin.html">Add Movie</a></nav></header>
+<section class="hero"><h1>Discover Your<br>Next Movie</h1><button onclick="document.getElementById('movies').scrollIntoView({behavior:'smooth'})">Explore Movies</button></section>
+<section class="search"><input id="search" placeholder="🔎 Search movie..."></section>
+<section><h2>Categories</h2><div class="cats"><button onclick="filterMovies('All')">All</button><button onclick="filterMovies('Action')">Action</button><button onclick="filterMovies('Comedy')">Comedy</button><button onclick="filterMovies('Adventure')">Adventure</button><button onclick="filterMovies('Animation')">Animation</button><button onclick="filterMovies('Sinhala Dubbed')">Sinhala Dubbed</button></div></section>
+<section id="movies"><div class="row"><h2>🔥 Latest Movies</h2><span id="count"></span></div><div id="grid" class="grid"></div></section><footer>🎬 MovieZone LK</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="movies.js"></script><script>
+let cat="All"; const grid=document.getElementById("grid"),search=document.getElementById("search");
+async function show(){const {data,error}=await supabaseClient.from("movies").select("*").order("created_at",{ascending:false}); if(error){grid.innerHTML="<p>Database error.</p>";return} const q=search.value.toLowerCase();const a=(data||[]).filter(m=>(m.title||"").toLowerCase().includes(q)&&(cat==="All"||((m.genre||"").split(",").map(x=>x.trim()).includes(cat))));document.getElementById("count").textContent=a.length+" Movies";grid.innerHTML=a.map(m=>`<a class="link" href="movie.html?id=${m.id}"><div class="card"><img src="${m.poster||""}"><div><h3>${m.title}</h3><p>${m.year||""} • ${m.genre||""}</p><b>⭐ ${m.rating||"N/A"}</b></div></div></a>`).join("")}
+function filterMovies(x){cat=x;show()} search.oninput=show; show();
+</script></body></html>
